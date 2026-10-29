@@ -547,6 +547,8 @@
           <label>៦. ប្រភេទករណី</label>
           <select id="caseType">
             <option value="គ្រោះថ្នាក់ចរាចរណ៍">គ្រោះថ្នាក់ចរាចរណ៍</option>
+            <option value="នៅផ្ទះ">នៅផ្ទះ</option>
+            <option value="ភ្លើងឆេះឬរលាកភ្លើង">ភ្លើងឆេះឬរលាកភ្លើង</option>
             <option value="រអិលដួល">រអិលដួល</option>
             <option value="ធ្លាក់លើផ្ទះឬអាគារ">ធ្លាក់លើផ្ទះឬអាគារ</option>
             <option value="សន្លប់">សន្លប់</option>
@@ -562,15 +564,52 @@
           <button type="button" class="btn btn-map" onclick="openGoogleMaps()">📍 ចាប់ទីតាំងលើ Google Maps</button>
         </div>
 
-        <!-- ៨. ស្ថានភាព / រោគសញ្ញាអ្នកជំងឺ -->
+        <!-- ៨. ស្ថានភាព / រោគសញ្ញាអ្នកជំងឺ + AI ICD-10 ទាំងអស់ -->
         <div class="form-group">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <label>៨. ស្ថានភាព / រោគសញ្ញាអ្នកជំងឺ</label>
-            <button type="button" class="clear-history-btn" onclick="clearSymptomsHistory()">លុបប្រវត្តិ</button>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px;">
+            <label>៨. ស្ថានភាព / រោគសញ្ញាអ្នកជំងឺ និងរោគវិនិច្ឆ័យ (ICD-10)</label>
+            <div class="no-export" style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" onclick="analyzeSymptomsAI()" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 700; cursor: pointer; box-shadow: 0 2px 6px rgba(79,70,229,0.25);">✨ វិភាគរោគសញ្ញា & ICD-10 (AI)</button>
+              <button type="button" class="clear-history-btn" onclick="clearSymptomsHistory()" style="margin:0;">លុបប្រវត្តិ</button>
+            </div>
           </div>
-          <textarea id="symptoms" placeholder="រៀបរាប់អំពីស្ថានភាព ឬចុចរើសពីប្រវត្តិខាងក្រោម..."></textarea>
-          
-          <div id="symptomsHistoryContainer" style="display: none;">
+
+          <textarea id="symptoms" placeholder="រៀបរាប់រោគសញ្ញា ឬចុចប៊ូតុង AI / ជ្រើសរើសកូដ ICD-10 ខាងក្រោម..."></textarea>
+
+          <!-- ផ្ទាំងជំនួយការ AI និងបណ្ណាល័យ ICD-10 ទាំងអស់ -->
+          <div id="aiIcdPanel" class="no-export" style="background: #f5f3ff; border: 1.5px solid #c4b5fd; border-radius: 10px; padding: 10px 12px; margin-top: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 4px;">
+              <span style="font-size: 0.85rem; font-weight: 700; color: #4338ca;">🤖 បណ្ណាល័យ AI & ICD-10 ទាំងអស់ (ខ្មែរ / អង់គ្លេស / កូដអន្តរជាតិ)៖</span>
+              <span id="icdCountBadge" style="font-size: 0.78rem; background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 99px; font-weight: 700;"></span>
+            </div>
+
+            <div class="grid-2" style="gap: 8px; margin-bottom: 8px;">
+              <select id="icdCategoryFilter" onchange="filterIcdList()" style="padding: 8px 10px; font-size: 0.86rem; border-color: #a5b4fc; background: #ffffff; font-weight: 700; color: #1e293b;">
+                <option value="ALL">📂 គ្រប់ផ្នែកទាំងអស់ (All Categories)</option>
+                <option value="TRAUMA">🤕 របួសប៉ះទង្គិច & បាក់ឆ្អឹង (S00-T14)</option>
+                <option value="BURN">🔥 ភ្លើងឆេះ រលាក & ផ្សែង (T20-T32, T59)</option>
+                <option value="CARDIO">❤️ បេះដូង & សរសៃឈាម (I00-I99)</option>
+                <option value="NEURO">🧠 ខួរក្បាល ស្ត្រូក & ប្រព័ន្ធប្រសាទ (G00-G99, I60-I69)</option>
+                <option value="RESP">🫁 ផ្លូវដង្ហើម & សួត (J00-J99)</option>
+                <option value="GI">🤢 ក្រពះ ពោះវៀន ថ្លើម & ពោះ (K00-K93)</option>
+                <option value="ENDO">🩸 ទឹកនោមផ្អែម អរម៉ូន & មេតាបូលីស (E00-E90)</option>
+                <option value="OBGYN">🤰 សម្ភព រោគស្ត្រី & ទារក (O00-P96)</option>
+                <option value="TOXIC">☠️ ពុលថ្នាំ គីមី សត្វទិច/ខាំ & អាលែកហ្ស៊ី (T36-T78)</option>
+                <option value="INFECT">🦠 ជំងឺឆ្លង & គ្រុនក្ដៅ (A00-B99)</option>
+                <option value="RENAL">💧 តម្រងនោម & ផ្លូវទឹកនោម (N00-N99)</option>
+                <option value="PSYCH">😰 វិបត្តិផ្លូវចិត្ត & ស្រវឹង/គ្រឿងញៀន (F00-F99)</option>
+                <option value="SYMPTOM">🩺 រោគសញ្ញាទូទៅ & សង្គ្រោះបន្ទាន់ (R00-R99)</option>
+                <option value="EXT">🚑 មូលហេតុខាងក្រៅ (ចរាចរណ៍/ដួល/វាយគ្នា V01-Y99)</option>
+              </select>
+
+              <input type="text" id="icdSearchInput" placeholder="🔍 វាយស្វែងរក (ខ្មែរ, English ឬកូដ ICD-10)..." oninput="filterIcdList()" style="padding: 8px 10px; font-size: 0.86rem; border-color: #a5b4fc; background: #ffffff;">
+            </div>
+
+            <div id="icdSuggestions" class="history-chips" style="max-height: 175px; overflow-y: auto; padding: 4px 2px;"></div>
+            <div id="icdOnlineStatus" style="font-size: 0.78rem; color: #6366f1; margin-top: 4px; display: none; font-weight: 600;">🌐 កំពុងស្វែងរកបន្ថែមពីទិន្នន័យ ICD-10 សកល (NLM/WHO)...</div>
+          </div>
+
+          <div id="symptomsHistoryContainer" class="no-export" style="display: none; margin-top: 4px;">
             <span style="font-size: 0.82rem; color: #64748b; font-weight: 600;">ប្រវត្តិធ្លាប់បំពេញកន្លងមក (ចុចដើម្បីជ្រើស)៖</span>
             <div class="history-chips" id="symptomsChips"></div>
           </div>
@@ -618,7 +657,11 @@
           <div class="photo-grid" id="photoGrid"></div>
         </div>
 
-        <div class="section-title">⏱ កាលវិភាគដំណើរការ</div>
+        <div class="section-title">🚑 រថយន្ត និងកាលវិភាគដំណើរការ</div>
+        <div class="form-group">
+          <label>🚘 ស្លាកលេខរថយន្ត</label>
+          <input type="text" id="vehiclePlate" placeholder="បញ្ចូលស្លាកលេខរថយន្ត..." autocomplete="off">
+        </div>
         <div class="grid-2">
           <div class="form-group">
             <label>ម៉ោងទទួលទូរស័ព្ទ</label>
@@ -871,6 +914,383 @@
       renderPhotos();
     }
 
+    // ===== បណ្ណាល័យទិន្នន័យ ICD-10 ទាំងអស់ សម្រាប់ផ្នែកសង្គ្រោះបន្ទាន់ និងជំងឺទូទៅ =====
+    const EMS_ICD10_DB = [
+      // ១. របួសប៉ះទង្គិច & បាក់ឆ្អឹង (TRAUMA: S00-T14)
+      { code: "S00.9", cat: "TRAUMA", kh: "របួសសើស្បែកនៅក្បាល", en: "Superficial injury of head, unspecified", keywords: ["ក្បាល", "រលាត់ក្បាល", "ពកក្បាល"] },
+      { code: "S01.9", cat: "TRAUMA", kh: "របួសដាច់រយះចេញឈាមនៅក្បាល", en: "Open wound of head, unspecified", keywords: ["បែកក្បាល", "រយះក្បាល", "ឈាមក្បាល", "ក្បាល"] },
+      { code: "S02.9", cat: "TRAUMA", kh: "បាក់ ឬប្រេះឆ្អឹងលលាដ៍ក្បាល និងមុខ", en: "Fracture of skull and facial bones, unspecified", keywords: ["បាក់ឆ្អឹងមុខ", "ប្រេះលលាដ៍", "បែកក្បាលធ្ងន់"] },
+      { code: "S06.0", cat: "TRAUMA", kh: "ប៉ះទង្គិចក្បាលស្រាល (វិលមុខ/សន្លប់មួយភ្លែត)", en: "Concussion", keywords: ["ប៉ះក្បាល", "វិលមុខ", "ដួលបោកក្បាល"] },
+      { code: "S06.4", cat: "TRAUMA", kh: "ឈាមកកក្រៅស្រោមខួរក្បាល (Epidural hemorrhage)", en: "Epidural hemorrhage", keywords: ["ឈាមកកក្នុងក្បាល", "ប៉ះទង្គិចក្បាលធ្ងន់"] },
+      { code: "S06.5", cat: "TRAUMA", kh: "ឈាមកកក្រោមស្រោមខួរក្បាល (Subdural hemorrhage)", en: "Traumatic subdural hemorrhage", keywords: ["ឈាមកកខួរក្បាល", "បោកក្បាល"] },
+      { code: "S06.6", cat: "TRAUMA", kh: "ហូរឈាមក្រោមស្រទាប់ពីងពាងខួរក្បាលដោយសាររបួស (Traumatic SAH)", en: "Traumatic subarachnoid hemorrhage", keywords: ["ឈាមខួរក្បាល", "ប៉ះទង្គិចក្បាល"] },
+      { code: "S06.9", cat: "TRAUMA", kh: "ប៉ះទង្គិចក្បាល / របួសក្នុងលលាដ៍ក្បាលធ្ងន់ធ្ងរ (TBI)", en: "Intracranial injury, unspecified", keywords: ["ក្បាល", "ប៉ះទង្គិចក្បាល", "ចរាចរណ៍", "ដួល", "TBI"] },
+      { code: "S09.9", cat: "TRAUMA", kh: "របួសក្បាលមិនបញ្ជាក់ច្បាស់", en: "Unspecified injury of head", keywords: ["របួសក្បាល", "បោកក្បាល"] },
+      { code: "S12.9", cat: "TRAUMA", kh: "បាក់ឆ្អឹងកងក (Fracture of neck)", en: "Fracture of neck, unspecified", keywords: ["បាក់ក", "ឆ្អឹងក", "របួសក"] },
+      { code: "S14.1", cat: "TRAUMA", kh: "របួសខួរឆ្អឹងខ្នងផ្នែកក", en: "Injury of cervical spinal cord", keywords: ["ខួរឆ្អឹងខ្នង", "ទន់ដៃជើង", "របួសក"] },
+      { code: "S22.0", cat: "TRAUMA", kh: "បាក់ឆ្អឹងកងខ្នងផ្នែកទ្រូង", en: "Fracture of thoracic vertebra", keywords: ["បាក់ឆ្អឹងខ្នង", "ឆ្អឹងខ្នង"] },
+      { code: "S22.3", cat: "TRAUMA", kh: "បាក់ឆ្អឹងជំនីរ (Fracture of rib)", en: "Fracture of rib", keywords: ["បាក់ឆ្អឹងជំនីរ", "ឈឺទ្រូង", "បោកទ្រូង"] },
+      { code: "S22.4", cat: "TRAUMA", kh: "បាក់ឆ្អឹងជំនីរច្រើនកន្លែង", en: "Multiple fractures of ribs", keywords: ["បាក់ឆ្អឹងជំនីរច្រើន", "ជំនីរ"] },
+      { code: "S27.0", cat: "TRAUMA", kh: "ធ្លាយខ្យល់ចូលក្នុងស្រោមសួតដោយសាររបួស (Traumatic pneumothorax)", en: "Traumatic pneumothorax", keywords: ["ធ្លាយសួត", "ហត់", "បោកទ្រូង"] },
+      { code: "S27.1", cat: "TRAUMA", kh: "ដក់ឈាមក្នុងស្រោមសួតដោយសាររបួស (Traumatic hemothorax)", en: "Traumatic hemothorax", keywords: ["ឈាមក្នុងសួត", "របួសទ្រូង"] },
+      { code: "S29.9", cat: "TRAUMA", kh: "ប៉ះទង្គិចទ្រូង (Blunt chest trauma)", en: "Unspecified injury of thorax", keywords: ["ប៉ះទង្គិចទ្រូង", "បោកទ្រូង"] },
+      { code: "S32.0", cat: "TRAUMA", kh: "បាក់ឆ្អឹងកងចង្កេះ (Fracture of lumbar vertebra)", en: "Fracture of lumbar vertebra", keywords: ["បាក់ចង្កេះ", "ឆ្អឹងចង្កេះ", "ដួលបោកចង្កេះ"] },
+      { code: "S32.8", cat: "TRAUMA", kh: "បាក់ឆ្អឹងត្រគាក (Fracture of pelvis)", en: "Fracture of pelvis", keywords: ["បាក់ត្រគាក", "ឆ្អឹងត្រគាក", "ត្រគាក"] },
+      { code: "S36.0", cat: "TRAUMA", kh: "របួសបែកអណ្តើក (Injury of spleen)", en: "Injury of spleen", keywords: ["បែកអណ្តើក", "ឈាមក្នុងពោះ", "ប៉ះទង្គិចពោះ"] },
+      { code: "S36.1", cat: "TRAUMA", kh: "របួសបែកថ្លើម (Injury of liver)", en: "Injury of liver or gallbladder", keywords: ["បែកថ្លើម", "ឈាមក្នុងពោះ", "ប៉ះទង្គិចពោះ"] },
+      { code: "S39.9", cat: "TRAUMA", kh: "ប៉ះទង្គិចពោះ និងចង្កេះ (Blunt abdominal trauma)", en: "Unspecified injury of abdomen, lower back and pelvis", keywords: ["ប៉ះទង្គិចពោះ", "បោកពោះ", "ឈឺពោះ"] },
+      { code: "S42.0", cat: "TRAUMA", kh: "បាក់ឆ្អឹងដងកាំបិត (Fracture of clavicle)", en: "Fracture of clavicle", keywords: ["បាក់ឆ្អឹងដងកាំបិត", "ដងកាំបិត", "ស្មា"] },
+      { code: "S42.3", cat: "TRAUMA", kh: "បាក់ឆ្អឹងដើមដៃ (Fracture of shaft of humerus)", en: "Fracture of shaft of humerus", keywords: ["បាក់ដើមដៃ", "ឆ្អឹងដើមដៃ", "បាក់ដៃ"] },
+      { code: "S43.0", cat: "TRAUMA", kh: "ភ្លាត់សន្លាក់ស្មា (Dislocation of shoulder joint)", en: "Dislocation of shoulder joint", keywords: ["ភ្លាត់ស្មា", "ផុតស្មា"] },
+      { code: "S52.5", cat: "TRAUMA", kh: "បាក់ឆ្អឹងកដៃ (Fracture of lower end of radius)", en: "Fracture of lower end of radius", keywords: ["បាក់កដៃ", "កដៃ", "រអិលដួល"] },
+      { code: "S52.9", cat: "TRAUMA", kh: "បាក់ឆ្អឹងកំភួនដៃ (Fracture of forearm)", en: "Fracture of forearm, unspecified", keywords: ["បាក់ដៃ", "កំភួនដៃ", "ដៃ"] },
+      { code: "S61.9", cat: "TRAUMA", kh: "របួសដាច់រយះកដៃ ឬប្រអប់ដៃ និងម្រាមដៃ", en: "Open wound of wrist and hand", keywords: ["ដាច់ដៃ", "មុតដៃ", "រយះដៃ"] },
+      { code: "S62.8", cat: "TRAUMA", kh: "បាក់ឆ្អឹងប្រអប់ដៃ ឬម្រាមដៃ", en: "Fracture of other and unspecified parts of wrist and hand", keywords: ["បាក់ម្រាមដៃ", "បាក់ប្រអប់ដៃ"] },
+      { code: "S68.4", cat: "TRAUMA", kh: "ដាច់ប្រអប់ដៃ ឬម្រាមដៃដោយសារគ្រោះថ្នាក់ (Traumatic amputation of hand)", en: "Traumatic amputation of hand at wrist level", keywords: ["ដាច់ដៃ", "ដាច់ម្រាមដៃ"] },
+      { code: "S72.0", cat: "TRAUMA", kh: "បាក់កឆ្អឹងភ្លៅ (Fracture of neck of femur)", en: "Fracture of neck of femur", keywords: ["បាក់កឆ្អឹងភ្លៅ", "រអិលដួល", "ចាស់ដួល"] },
+      { code: "S72.3", cat: "TRAUMA", kh: "បាក់តួឆ្អឹងភ្លៅ (Fracture of shaft of femur)", en: "Fracture of shaft of femur", keywords: ["បាក់ភ្លៅ", "ឆ្អឹងភ្លៅ"] },
+      { code: "S72.9", cat: "TRAUMA", kh: "សង្ស័យបាក់ឆ្អឹងភ្លៅ (Fracture of femur, unspecified)", en: "Fracture of femur, unspecified", keywords: ["បាក់ជើង", "ឆ្អឹងភ្លៅ", "ភ្លៅ"] },
+      { code: "S73.0", cat: "TRAUMA", kh: "ភ្លាត់សន្លាក់ត្រគាក (Dislocation of hip)", en: "Dislocation of hip", keywords: ["ភ្លាត់ត្រគាក"] },
+      { code: "S82.0", cat: "TRAUMA", kh: "បាក់ឆ្អឹងក្បាលជង្គង់ (Fracture of patella)", en: "Fracture of patella", keywords: ["បាក់ជង្គង់", "ក្បាលជង្គង់"] },
+      { code: "S82.2", cat: "TRAUMA", kh: "បាក់ឆ្អឹងស្មងជើង (Fracture of shaft of tibia)", en: "Fracture of shaft of tibia", keywords: ["បាក់ស្មងជើង", "ស្មងជើង"] },
+      { code: "S82.8", cat: "TRAUMA", kh: "បាក់ឆ្អឹងកជើង (Fracture of ankle)", en: "Fracture of other parts of lower leg (ankle)", keywords: ["បាក់កជើង", "កជើង"] },
+      { code: "S82.9", cat: "TRAUMA", kh: "សង្ស័យបាក់ឆ្អឹងស្មងជើង (Fracture of lower leg)", en: "Fracture of lower leg, unspecified", keywords: ["បាក់ជើង", "ស្មងជើង", "ជើង"] },
+      { code: "S92.9", cat: "TRAUMA", kh: "បាក់ឆ្អឹងប្រអប់ជើង ឬម្រាមជើង (Fracture of foot)", en: "Fracture of foot, unspecified", keywords: ["បាក់ប្រអប់ជើង", "ម្រាមជើង"] },
+      { code: "S93.4", cat: "TRAUMA", kh: "គ្រេចកជើង (Sprain and strain of ankle)", en: "Sprain and strain of ankle", keywords: ["គ្រេចជើង", "គ្រេចកជើង", "រអិលដួល"] },
+      { code: "T00.9", cat: "TRAUMA", kh: "របួសដាច់រលាត់សើស្បែកច្រើនកន្លែង", en: "Multiple superficial injuries, unspecified", keywords: ["រលាត់ស្បែក", "រលាត់ដៃជើង", "ចរាចរណ៍"] },
+      { code: "T01.9", cat: "TRAUMA", kh: "របួសដាច់រយះចេញឈាមច្រើនកន្លែង", en: "Multiple open wounds, unspecified", keywords: ["រយះច្រើនកន្លែង", "ហូរឈាមច្រើន"] },
+      { code: "T02.9", cat: "TRAUMA", kh: "បាក់ឆ្អឹងច្រើនកន្លែងលើរាងកាយ", en: "Multiple fractures, unspecified", keywords: ["បាក់ឆ្អឹងច្រើន", "ធ្លាក់ពីលើអាគារ"] },
+      { code: "T07", cat: "TRAUMA", kh: "របួសពហុសរីរាង្គ / របួសច្រើនកន្លែង (Polytrauma)", en: "Unspecified multiple injuries", keywords: ["ចរាចរណ៍", "របួសច្រើន", "ដាច់រលាត់", "បោកផ្ទប់", "ធ្លាក់លើផ្ទះឬអាគារ"] },
+      { code: "T14.0", cat: "TRAUMA", kh: "របួសសើស្បែក ឬជាំសាច់", en: "Superficial injury of unspecified body region", keywords: ["ជាំ", "រលាត់", "វាយគ្នា"] },
+      { code: "T14.1", cat: "TRAUMA", kh: "របួសដាច់រលាត់ ឬរយះចេញឈាម", en: "Open wound of unspecified body region", keywords: ["ឈាម", "ដាច់រលាត់", "បែក", "រយះ", "វាយគ្នា", "កាប់"] },
+      { code: "T14.2", cat: "TRAUMA", kh: "បាក់ឆ្អឹង (មិនបញ្ជាក់ទីតាំងច្បាស់)", en: "Fracture of unspecified body region", keywords: ["បាក់ឆ្អឹង"] },
+      { code: "T79.4", cat: "TRAUMA", kh: "សុកដោយសាររបួស និងបាត់បង់ឈាមខ្លាំង (Traumatic shock)", en: "Traumatic shock", keywords: ["សុក", "បាត់ឈាម", "ត្រជាក់ចុងដៃចុងជើង"] },
+
+      // ២. ភ្លើងឆេះ រលាក & ផ្សែង (BURN: T20-T32, T59, W85)
+      { code: "T20.0", cat: "BURN", kh: "រលាកភ្លើង/ទឹកក្ដៅ នៅតំបន់ក្បាល និងក", en: "Burn of unspecified degree of head and neck", keywords: ["រលាកមុខ", "រលាកក្បាល", "ភ្លើងឆេះ"] },
+      { code: "T21.0", cat: "BURN", kh: "រលាកភ្លើង/ទឹកក្ដៅ នៅតំបន់ដងខ្លួន (ទ្រូង/ពោះ/ខ្នង)", en: "Burn of unspecified degree of trunk", keywords: ["រលាកខ្លួន", "រលាកទ្រូង", "រលាកពោះ"] },
+      { code: "T22.0", cat: "BURN", kh: "រលាកភ្លើង/ទឹកក្ដៅ នៅស្មា និងដៃ", en: "Burn of unspecified degree of shoulder and upper limb", keywords: ["រលាកដៃ", "ភ្លើងឆេះដៃ"] },
+      { code: "T24.0", cat: "BURN", kh: "រលាកភ្លើង/ទឹកក្ដៅ នៅត្រគាក និងជើង", en: "Burn of unspecified degree of hip and lower limb", keywords: ["រលាកជើង", "ភ្លើងឆេះជើង"] },
+      { code: "T27.0", cat: "BURN", kh: "រលាកផ្លូវដង្ហើមដោយសារកម្ដៅភ្លើង", en: "Burn of larynx and trachea", keywords: ["រលាកផ្លូវដង្ហើម", "ភ្លើងឆេះ"] },
+      { code: "T29.0", cat: "BURN", kh: "រលាកភ្លើងច្រើនកន្លែងលើរាងកាយ (Multiple burns)", en: "Burns of multiple regions, unspecified degree", keywords: ["រលាកច្រើនកន្លែង", "ភ្លើងឆេះខ្លួន"] },
+      { code: "T30.0", cat: "BURN", kh: "រលាកភ្លើង ឬរលាកទឹកក្ដៅ (Burn, unspecified)", en: "Burn of unspecified body region, unspecified degree", keywords: ["ភ្លើង", "រលាក", "ឆេះ", "ទឹកក្ដៅ", "ខ្លោច", "ភ្លើងឆេះឬរលាកភ្លើង"] },
+      { code: "T30.1", cat: "BURN", kh: "រលាកភ្លើងកម្រិតទី ១ (ក្រហមស្បែក)", en: "Burn of first degree, body region unspecified", keywords: ["រលាកកម្រិត១", "រលាកស្រាល"] },
+      { code: "T30.2", cat: "BURN", kh: "រលាកភ្លើងកម្រិតទី ២ (ពងបែកទឹក)", en: "Burn of second degree, body region unspecified", keywords: ["រលាកកម្រិត២", "ពងទឹក", "រលាកពង"] },
+      { code: "T30.3", cat: "BURN", kh: "រលាកភ្លើងកម្រិតទី ៣ (រលាកជ្រៅខ្លោចស្បែក)", en: "Burn of third degree, body region unspecified", keywords: ["រលាកកម្រិត៣", "រលាកធ្ងន់", "ខ្លោច"] },
+      { code: "T31.2", cat: "BURN", kh: "រលាកភ្លើងធ្ងន់ធ្ងរ ២០% ទៅ ២៩% នៃផ្ទៃរាងកាយ", en: "Burns involving 20-29% of body surface", keywords: ["រលាកធ្ងន់", "ភ្លើងឆេះ"] },
+      { code: "T31.5", cat: "BURN", kh: "រលាកភ្លើងធ្ងន់ធ្ងរខ្លាំង ៥០% ឡើងលើនៃផ្ទៃរាងកាយ", en: "Burns involving 50-59% of body surface", keywords: ["រលាកពេញខ្លួន", "ភ្លើងឆេះខ្លាំង"] },
+      { code: "T58", cat: "BURN", kh: "ពុលឧស្ម័នកាបូនម៉ូណូអុកស៊ីត (Carbon monoxide poisoning)", en: "Toxic effect of carbon monoxide", keywords: ["ពុលផ្សែង", "ឧស្ម័ន", "ឈ្លក់ផ្សែង"] },
+      { code: "T59.8", cat: "BURN", kh: "ឈ្លក់ផ្សែងភ្លើង / ពុលផ្សែង (Smoke inhalation)", en: "Toxic effect of smoke inhalation", keywords: ["ផ្សែង", "ភ្លើងឆេះ", "ថប់ដង្ហើម", "ឈ្លក់ផ្សែង", "ភ្លើងឆេះឬរលាកភ្លើង"] },
+      { code: "T75.4", cat: "BURN", kh: "ឆក់ខ្សែភ្លើង / ចរន្តអគ្គិសនីឆក់ (Electrocution / Electric current)", en: "Effects of electric current", keywords: ["ឆក់ភ្លើង", "ឆក់ខ្សែភ្លើង", "អគ្គិសនី"] },
+      { code: "T75.0", cat: "BURN", kh: "រន្ទះបាញ់ (Effects of lightning)", en: "Effects of lightning", keywords: ["រន្ទះបាញ់", "រន្ទះ"] },
+
+      // ៣. បេះដូង & សរសៃឈាម (CARDIO: I00-I99)
+      { code: "I10", cat: "CARDIO", kh: "លើសសម្ពាធឈាមខ្លាំង (Essential hypertension)", en: "Essential (primary) hypertension", keywords: ["លើសឈាម", "ឈាមឡើង", "វិលមុខ", "ឈឺក្បាល", "នៅផ្ទះ"] },
+      { code: "I16.0", cat: "CARDIO", kh: "វិបត្តិលើសសម្ពាធឈាមបន្ទាន់ (Hypertensive urgency)", en: "Hypertensive urgency", keywords: ["ឈាមឡើងខ្ពស់", "លើសឈាមខ្លាំង"] },
+      { code: "I16.1", cat: "CARDIO", kh: "វិបត្តិលើសសម្ពាធឈាមគ្រោះថ្នាក់បន្ទាន់ (Hypertensive emergency)", en: "Hypertensive emergency", keywords: ["លើសឈាមធ្ងន់ធ្ងរ", "ឈាមឡើងខ្លាំង"] },
+      { code: "I20.0", cat: "CARDIO", kh: "ឈឺទ្រូងដោយសារខ្វះឈាមចិញ្ចឹមបេះដូង (Unstable angina)", en: "Unstable angina", keywords: ["ឈឺទ្រូង", "ចុកដើមទ្រូង", "តឹងទ្រូង"] },
+      { code: "I20.9", cat: "CARDIO", kh: "ចុកណែនដើមទ្រូង (Angina pectoris)", en: "Angina pectoris, unspecified", keywords: ["ចុកទ្រូង", "ណែនទ្រូង"] },
+      { code: "I21.9", cat: "CARDIO", kh: "គាំងបេះដូងស្រួចស្រាវ / ស្ទះសរសៃឈាមបេះដូង (AMI)", en: "Acute myocardial infarction, unspecified", keywords: ["គាំងបេះដូង", "ចុកទ្រូង", "បែកញើស", "ស្ទះសរសៃឈាមបេះដូង"] },
+      { code: "I26.9", cat: "CARDIO", kh: "ស្ទះសរសៃឈាមក្នុងសួត (Pulmonary embolism)", en: "Pulmonary embolism without acute cor pulmonale", keywords: ["ស្ទះសរសៃឈាមសួត", "ហត់ភ្លាមៗ", "ឈឺទ្រូង"] },
+      { code: "I46.9", cat: "CARDIO", kh: "គាំងបេះដូងបាត់ជីពចរ (Cardiac arrest)", en: "Cardiac arrest, unspecified", keywords: ["គាំងបេះដូង", "បាត់ជីពចរ", "ដាច់ខ្យល់", "CPR", "គាំងដង្ហើម"] },
+      { code: "I47.1", cat: "CARDIO", kh: "បេះដូងដើរញាប់ខ្លាំងខុសប្រក្រតី (Supraventricular tachycardia - SVT)", en: "Supraventricular tachycardia", keywords: ["បេះដូងដើរញាប់", "ញ័រទ្រូង", "SVT"] },
+      { code: "I47.2", cat: "CARDIO", kh: "បេះដូងដើរញាប់ថតក្រោម (Ventricular tachycardia - VT)", en: "Ventricular tachycardia", keywords: ["បេះដូងញាប់", "VT"] },
+      { code: "I48.9", cat: "CARDIO", kh: "ចង្វាក់បេះដូងដើរមិនស្មើ (Atrial fibrillation - AF)", en: "Unspecified atrial fibrillation and atrial flutter", keywords: ["បេះដូងដើរខុសចង្វាក់", "ញ័រទ្រូង", "AF"] },
+      { code: "I49.9", cat: "CARDIO", kh: "វិបត្តិចង្វាក់បេះដូង (Cardiac arrhythmia)", en: "Cardiac arrhythmia, unspecified", keywords: ["ខុសចង្វាក់បេះដូង", "បេះដូងដើរយឺត", "ញ័រទ្រូង"] },
+      { code: "I50.1", cat: "CARDIO", kh: "ខ្សោយបេះដូងហើមសួតស្រួចស្រាវ (Acute pulmonary edema / Left heart failure)", en: "Left ventricular failure", keywords: ["ហើមសួត", "ហត់ដង្ហក់", "ខ្សោយបេះដូង"] },
+      { code: "I50.9", cat: "CARDIO", kh: "ជំងឺខ្សោយបេះដូង (Heart failure)", en: "Heart failure, unspecified", keywords: ["ខ្សោយបេះដូង", "ហត់", "ហើមជើង", "នៅផ្ទះ"] },
+      { code: "I71.0", cat: "CARDIO", kh: "រហែកសរសៃឈាមធំអាអក (Dissection of aorta)", en: "Dissection of aorta", keywords: ["ឈឺទ្រូងចាក់ទៅខ្នង", "រហែកសរសៃឈាមធំ"] },
+      { code: "I95.9", cat: "CARDIO", kh: "សម្ពាធឈាមធ្លាក់ចុះទាប (Hypotension)", en: "Hypotension, unspecified", keywords: ["ចុះឈាម", "ធ្លាក់ឈាម", "សម្ពាធឈាមទាប", "វិលមុខ"] },
+
+      // ៤. ខួរក្បាល ស្ត្រូក & ប្រព័ន្ធប្រសាទ (NEURO: G00-G99, I60-I69)
+      { code: "I60.9", cat: "NEURO", kh: "ដាច់សរសៃឈាមក្រោមស្រទាប់ពីងពាងខួរក្បាល (Subarachnoid hemorrhage)", en: "Non-traumatic subarachnoid hemorrhage, unspecified", keywords: ["ឈឺក្បាលខ្លាំងភ្លាមៗ", "ដាច់សរសៃឈាមខួរក្បាល"] },
+      { code: "I61.9", cat: "NEURO", kh: "ដាច់សរសៃឈាមក្នុងខួរក្បាល (Intracerebral hemorrhage)", en: "Non-traumatic intracerebral hemorrhage, unspecified", keywords: ["ដាច់សរសៃឈាមខួរក្បាល", "ឈាមកកខួរក្បាល", "សន្លប់", "លើសឈាម"] },
+      { code: "I63.9", cat: "NEURO", kh: "ស្ទះសរសៃឈាមខួរក្បាល (Cerebral infarction / Ischemic stroke)", en: "Cerebral infarction, unspecified", keywords: ["ស្ទះសរសៃឈាមខួរក្បាល", "ទន់មួយចំហៀងខ្លួន", "វៀចមាត់"] },
+      { code: "I64", cat: "NEURO", kh: "ជំងឺស្ត្រូក / ដាច់ឬស្ទះសរសៃឈាមខួរក្បាល (Stroke)", en: "Stroke, not specified as hemorrhage or infarction", keywords: ["វៀចមាត់", "ទន់មួយចំហៀងខ្លួន", "និយាយមិនច្បាស់", "លើសឈាម", "ស្ត្រូក", "នៅផ្ទះ"] },
+      { code: "G45.9", cat: "NEURO", kh: "ខ្វះឈាមចិញ្ចឹមខួរក្បាលបណ្ដោះអាសន្ន (TIA)", en: "Transient cerebral ischemic attack, unspecified", keywords: ["ស្ពឹកមួយចំហៀង", "វិលមុខ", "TIA"] },
+      { code: "G40.9", cat: "NEURO", kh: "ជំងឺឆ្កួតជ្រូក / ប្រកាច់ (Epilepsy)", en: "Epilepsy, unspecified", keywords: ["ឆ្កួតជ្រូក", "ប្រកាច់", "បែកពពុះមាត់"] },
+      { code: "G41.9", cat: "NEURO", kh: "ប្រកាច់ជាប់មិនឈប់កម្រិតធ្ងន់ (Status epilepticus)", en: "Status epilepticus, unspecified", keywords: ["ប្រកាច់ជាប់", "ប្រកាច់មិនដឹងខ្លួន"] },
+      { code: "G03.9", cat: "NEURO", kh: "សង្ស័យរលាកស្រោមខួរក្បាល (Meningitis)", en: "Meningitis, unspecified", keywords: ["រលាកស្រោមខួរ", "ក្ដៅខ្លួនរឹងក", "ឈឺក្បាល"] },
+      { code: "G81.9", cat: "NEURO", kh: "ទន់ដៃជើងមួយចំហៀងខ្លួន (Hemiplegia)", en: "Hemiplegia, unspecified", keywords: ["ទន់ដៃជើង", "ស្លាប់មួយចំហៀងខ្លួន"] },
+
+      // ៥. ផ្លូវដង្ហើម & សួត (RESP: J00-J99)
+      { code: "J18.9", cat: "RESP", kh: "ជំងឺរលាកសួត (Pneumonia, unspecified)", en: "Pneumonia, unspecified organism", keywords: ["រលាកសួត", "ក្អក", "ក្ដៅខ្លួន", "ហត់", "នៅផ្ទះ"] },
+      { code: "J44.1", cat: "RESP", kh: "ជំងឺស្ទះសួតរ៉ាំរ៉ៃធ្វើទុក្ខស្រួចស្រាវ (COPD with acute exacerbation)", en: "Chronic obstructive pulmonary disease with acute exacerbation", keywords: ["ស្ទះសួត", "ហត់ដង្ហក់", "COPD", "នៅផ្ទះ"] },
+      { code: "J45.9", cat: "RESP", kh: "ជំងឺហឺតធ្វើទុក្ខ (Asthma attack)", en: "Asthma, unspecified", keywords: ["ហឺត", "ថប់ដង្ហើម", "ដង្ហក់"] },
+      { code: "J46", cat: "RESP", kh: "ជំងឺហឺតធ្វើទុក្ខធ្ងន់ធ្ងរ (Status asthmaticus)", en: "Status asthmaticus", keywords: ["ហឺតធ្ងន់ធ្ងរ", "ហត់ខ្លាំង"] },
+      { code: "J81", cat: "RESP", kh: "ទឹកដក់ក្នុងសួត / ហើមសួតស្រួចស្រាវ (Pulmonary edema)", en: "Pulmonary edema", keywords: ["ទឹកក្នុងសួត", "ហើមសួត", "ដង្ហក់"] },
+      { code: "J93.9", cat: "RESP", kh: "ធ្លាយខ្យល់ក្នុងស្រោមសួត (Pneumothorax)", en: "Pneumothorax, unspecified", keywords: ["ធ្លាយសួត", "ឈឺទ្រូងហត់"] },
+      { code: "J96.0", cat: "RESP", kh: "ខ្សោយផ្លូវដង្ហើមស្រួចស្រាវ (Acute respiratory failure)", en: "Acute respiratory failure", keywords: ["ខ្សោយផ្លូវដង្ហើម", "ធ្លាក់អុកស៊ីសែន", "ដកដង្ហើមមិនរួច", "SpO2"] },
+      { code: "T17.9", cat: "RESP", kh: "ស្លាក់របស់របរ ឬអាហារក្នុងផ្លូវដង្ហើម (Foreign body in respiratory tract)", en: "Foreign body in respiratory tract, unspecified", keywords: ["ស្លាក់", "ស្លាក់អាហារ", "ស្ទះបំពង់ខ្យល់"] },
+
+      // ៦. ក្រពះ ពោះវៀន ថ្លើម & ពោះ (GI: K00-K93)
+      { code: "K25.9", cat: "GI", kh: "ដំបៅក្រពះ (Gastric ulcer)", en: "Gastric ulcer, unspecified", keywords: ["ឈឺក្រពះ", "ចុកចុងដង្ហើម", "ដំបៅក្រពះ"] },
+      { code: "K29.7", cat: "GI", kh: "រលាកក្រពះស្រួចស្រាវ (Gastritis, unspecified)", en: "Gastritis, unspecified", keywords: ["រលាកក្រពះ", "ចុកក្រពះ", "ក្អួតចង្អោរ"] },
+      { code: "K35.8", cat: "GI", kh: "សង្ស័យរលាកខ្នែងពោះវៀនស្រួចស្រាវ (Acute appendicitis)", en: "Acute appendicitis", keywords: ["រលាកខ្នែងពោះវៀន", "ឈឺពោះខាងស្ដាំ", "ចុកពោះ"] },
+      { code: "K52.9", cat: "GI", kh: "រលាកក្រពះពោះវៀន (Gastroenteritis and colitis)", en: "Noninfective gastroenteritis and colitis, unspecified", keywords: ["រាក", "ក្អួត", "រលាកពោះវៀន"] },
+      { code: "K56.6", cat: "GI", kh: "ស្ទះពោះវៀន (Intestinal obstruction)", en: "Other and unspecified intestinal obstruction", keywords: ["ស្ទះពោះវៀន", "ហើមពោះ", "ឈឺពោះក្អួត"] },
+      { code: "K65.9", cat: "GI", kh: "រលាកស្រោមពោះ (Peritonitis)", en: "Peritonitis, unspecified", keywords: ["រលាកស្រោមពោះ", "រឹងពោះ", "ឈឺពោះខ្លាំង"] },
+      { code: "K74.6", cat: "GI", kh: "ជំងឺក្រិនថ្លើម (Cirrhosis of liver)", en: "Other and unspecified cirrhosis of liver", keywords: ["ក្រិនថ្លើម", "ទាចទឹក", "ថ្លើម"] },
+      { code: "K80.2", cat: "GI", kh: "គ្រួសក្នុងថង់ទឹកប្រមាត់ធ្វើទុក្ខ (Calculus of gallbladder)", en: "Calculus of gallbladder without cholecystitis", keywords: ["គ្រួសក្នុងប្រមាត់", "ឈឺឆ្អឹងជំនីរស្ដាំ"] },
+      { code: "K81.0", cat: "GI", kh: "រលាកថង់ទឹកប្រមាត់ស្រួចស្រាវ (Acute cholecystitis)", en: "Acute cholecystitis", keywords: ["រលាកប្រមាត់", "ឈឺពោះខាងស្ដាំ"] },
+      { code: "K85.9", cat: "GI", kh: "រលាកលំពែងស្រួចស្រាវ (Acute pancreatitis)", en: "Acute pancreatitis, unspecified", keywords: ["រលាកលំពែង", "ឈឺចុងដង្ហើមខ្លាំង"] },
+      { code: "K92.0", cat: "GI", kh: "ក្អួតឈាម (Hematemesis)", en: "Hematemesis", keywords: ["ក្អួតឈាម", "ហូរឈាមក្រពះ"] },
+      { code: "K92.1", cat: "GI", kh: "បន្ទោរបង់មកខ្មៅ (Melena)", en: "Melena", keywords: ["លាមកខ្មៅ", "ហូរឈាមពោះវៀន"] },
+      { code: "K92.2", cat: "GI", kh: "ហូរឈាមផ្លូវរំលាយអាហារ (Gastrointestinal hemorrhage)", en: "Gastrointestinal hemorrhage, unspecified", keywords: ["ហូរឈាមក្រពះ", "ហូរឈាមពោះវៀន", "ក្អួតឈាម", "នៅផ្ទះ"] },
+
+      // ៧. ទឹកនោមផ្អែម អរម៉ូន & មេតាបូលីស (ENDO: E00-E90)
+      { code: "E11.9", cat: "ENDO", kh: "ជំងឺទឹកនោមផ្អែមប្រភេទទី ២ (Type 2 diabetes mellitus)", en: "Type 2 diabetes mellitus without complications", keywords: ["ទឹកនោមផ្អែម", "ឡើងជាតិស្ករ", "នៅផ្ទះ"] },
+      { code: "E10.1", cat: "ENDO", kh: "ទឹកនោមផ្អែមឡើងជាតិអាស៊ីតក្នុងឈាម (Diabetic ketoacidosis - DKA)", en: "Type 1 diabetes mellitus with ketoacidosis", keywords: ["ឡើងជាតិស្ករខ្លាំង", "DKA", "ហត់", "សន្លប់"] },
+      { code: "E11.0", cat: "ENDO", kh: "សន្លប់ដោយសារឡើងជាតិស្ករខ្ពស់ខ្លាំង (Hyperosmolar hyperglycemic state - HHS)", en: "Type 2 diabetes mellitus with hyperosmolarity", keywords: ["ឡើងស្ករខ្ពស់", "សន្លប់ទឹកនោមផ្អែម"] },
+      { code: "E16.2", cat: "ENDO", kh: "ចុះជាតិស្ករក្នុងឈាមខ្លាំង (Hypoglycemia)", en: "Hypoglycemia, unspecified", keywords: ["ចុះជាតិស្ករ", "ញ័រដៃជើង", "បែកញើសត្រជាក់", "សន្លប់", "នៅផ្ទះ"] },
+      { code: "E86", cat: "ENDO", kh: "ខ្សោះជាតិទឹកក្នុងខ្លួន (Volume depletion / Dehydration)", en: "Volume depletion", keywords: ["ខ្សោះជាតិទឹក", "អស់កម្លាំង", "រាកក្អួត"] },
+      { code: "E87.1", cat: "ENDO", kh: "ចុះជាតិប្រៃក្នុងឈាម (Hyponatremia)", en: "Hypo-osmolality and hyponatremia", keywords: ["ចុះជាតិប្រៃ", "សន្លឹម", "អស់កម្លាំង"] },
+      { code: "E87.6", cat: "ENDO", kh: "ចុះជាតិប៉ូតាស្យូមក្នុងឈាម (Hypokalemia)", en: "Hypokalemia", keywords: ["ចុះប៉ូតាស្យូម", "ទន់ដៃជើង"] },
+
+      // ៨. សម្ភព រោគស្ត្រី & ទារក (OBGYN: O00-P96)
+      { code: "O00.9", cat: "OBGYN", kh: "កូនក្រៅស្បូន (Ectopic pregnancy)", en: "Ectopic pregnancy, unspecified", keywords: ["កូនក្រៅស្បូន", "ឈឺពោះផ្នែកខាងក្រោម", "ធ្លាក់ឈាម"] },
+      { code: "O03.9", cat: "OBGYN", kh: "រលូតកូន / ធ្លាក់ឈាមពេលមានផ្ទៃពោះ (Spontaneous abortion)", en: "Complete or unspecified spontaneous abortion", keywords: ["រលូតកូន", "ធ្លាក់ឈាមមានផ្ទៃពោះ"] },
+      { code: "O14.9", cat: "OBGYN", kh: "បម្រុងក្រឡាភ្លើង (Pre-eclampsia)", en: "Pre-eclampsia, unspecified", keywords: ["បម្រុងក្រឡាភ្លើង", "លើសឈាមពេលមានផ្ទៃពោះ"] },
+      { code: "O15.9", cat: "OBGYN", kh: "ក្រឡាភ្លើងប្រកាច់ពេលមានផ្ទៃពោះ (Eclampsia)", en: "Eclampsia, unspecified as to time period", keywords: ["ក្រឡាភ្លើង", "ប្រកាច់មានផ្ទៃពោះ"] },
+      { code: "O46.9", cat: "OBGYN", kh: "ធ្លាក់ឈាមមុនសម្រាល (Antepartum hemorrhage)", en: "Antepartum hemorrhage, unspecified", keywords: ["ធ្លាក់ឈាមមុនសម្រាល", "មានផ្ទៃពោះ"] },
+      { code: "O60.0", cat: "OBGYN", kh: "ឈឺពោះសម្រាលកូនមុនខែ (Preterm labor)", en: "Preterm labor without delivery", keywords: ["ឈឺពោះឆ្លងទន្លេ", "មុនខែ"] },
+      { code: "O72.1", cat: "OBGYN", kh: "ធ្លាក់ឈាមខ្លាំងក្រោយសម្រាលកូន (Postpartum hemorrhage - PPH)", en: "Other immediate postpartum hemorrhage", keywords: ["ធ្លាក់ឈាមក្រោយសម្រាល", "ឆ្លងទន្លេ"] },
+      { code: "O80", cat: "OBGYN", kh: "ឈឺពោះសម្រាលកូនធម្មតា (Single spontaneous delivery / Active labor)", en: "Encounter for full-term uncomplicated delivery", keywords: ["ឈឺពោះសម្រាលកូន", "ឆ្លងទន្លេ", "បែកទឹកភ្លោះ", "នៅផ្ទះ"] },
+      { code: "N93.9", cat: "OBGYN", kh: "ធ្លាក់ឈាមតាមទ្វារមាសខុសប្រក្រតី (Abnormal uterine and vaginal bleeding)", en: "Abnormal uterine and vaginal bleeding, unspecified", keywords: ["ធ្លាក់ឈាមរោគស្ត្រី", "ធ្លាក់ឈាម"] },
+
+      // ៩. ពុលថ្នាំ គីមី សត្វទិច/ខាំ & អាលែកហ្ស៊ី (TOXIC: T36-T78)
+      { code: "T39.1", cat: "TOXIC", kh: "ពុលថ្នាំប៉ារ៉ាសេតាម៉ុលលើសកម្រិត (Paracetamol overdose)", en: "Poisoning by 4-Aminophenol derivatives", keywords: ["លេបថ្នាំលើសកម្រិត", "ពុលថ្នាំ", "ប៉ារ៉ា"] },
+      { code: "T42.4", cat: "TOXIC", kh: "ពុលថ្នាំងងុយគេង (Benzodiazepines overdose)", en: "Poisoning by benzodiazepines", keywords: ["លេបថ្នាំងងុយគេង", "លេបថ្នាំសម្លាប់ខ្លួន"] },
+      { code: "T50.9", cat: "TOXIC", kh: "ពុលថ្នាំពេទ្យ ឬលេបថ្នាំលើសកម្រិត (Drug poisoning / Overdose)", en: "Poisoning by other and unspecified drugs and medications", keywords: ["លេបថ្នាំ", "ពុលថ្នាំពេទ្យ"] },
+      { code: "T51.0", cat: "TOXIC", kh: "ពុលសុរា / ស្រវឹងស្រាខ្លាំងបាត់ស្មារតី (Alcohol intoxication)", en: "Toxic effect of ethanol", keywords: ["ពុលស្រា", "ស្រវឹងស្រា", "សន្លប់"] },
+      { code: "T60.0", cat: "TOXIC", kh: "ពុលថ្នាំសម្លាប់សត្វល្អិត (Organophosphate pesticide poisoning)", en: "Toxic effect of organophosphate and carbamate insecticides", keywords: ["ពុលថ្នាំសម្លាប់សត្វល្អិត", "ផឹកថ្នាំពុល", "បែកពពុះមាត់"] },
+      { code: "T62.9", cat: "TOXIC", kh: "ពុលអាហារ (Food poisoning)", en: "Toxic effect of noxious substance eaten as food", keywords: ["ពុលអាហារ", "ក្អួត", "រាក"] },
+      { code: "T63.0", cat: "TOXIC", kh: "ពស់ចឹក (Toxic effect of snake venom)", en: "Toxic effect of snake venom", keywords: ["ពស់ចឹក", "ពស់"] },
+      { code: "T63.4", cat: "TOXIC", kh: "សត្វល្អិតទិច ឬខាំ (ឃ្មុំ/ឪម៉ាល់/ខ្ទួយទិច)", en: "Toxic effect of venom of other arthropods", keywords: ["ឃ្មុំទិច", "ឪម៉ាល់ទិច", "ខ្ទួយទិច", "សត្វទិច"] },
+      { code: "T65.9", cat: "TOXIC", kh: "ពុលសារធាតុគីមីមិនបញ្ជាក់ច្បាស់", en: "Toxic effect of unspecified substance", keywords: ["ពុល", "គីមី"] },
+      { code: "T78.2", cat: "TOXIC", kh: "សុកអាណាហ្វីឡាក់ស៊ី / អាលែកហ្ស៊ីធ្ងន់ធ្ងរ (Anaphylactic shock)", en: "Anaphylactic shock, unspecified", keywords: ["អាលែកហ្ស៊ី", "សុកថ្នាំ", "ហើមមុខហត់", "កន្ទួលរមាស់"] },
+      { code: "T78.4", cat: "TOXIC", kh: "ប្រតិកម្មអាលែកហ្ស៊ីស្រួចស្រាវ (Allergy, unspecified)", en: "Allergy, unspecified", keywords: ["អាលែកហ្ស៊ី", "កន្ទួលក្រហម"] },
+      { code: "T75.1", cat: "TOXIC", kh: "លង់ទឹក (Drowning and nonfatal submersion)", en: "Drowning and nonfatal submersion", keywords: ["លង់ទឹក", "ឈ្លក់ទឹក"] },
+      { code: "T67.0", cat: "TOXIC", kh: "សន្លប់ដោយសារកម្ដៅថ្ងៃខ្លាំង (Heatstroke and sunstroke)", en: "Heatstroke and sunstroke", keywords: ["គាំងកម្ដៅ", "ក្ដៅខ្លាំងសន្លប់"] },
+
+      // ១០. ជំងឺឆ្លង & គ្រុនក្ដៅ (INFECT: A00-B99)
+      { code: "A09", cat: "INFECT", kh: "រលាកពោះវៀនរាករូសដោយសារមេរោគ (Infectious gastroenteritis and diarrhea)", en: "Infectious gastroenteritis and colitis, unspecified", keywords: ["រាកខ្លាំង", "ក្អួតរាក", "រលាកពោះវៀន"] },
+      { code: "A41.9", cat: "INFECT", kh: "មេរោគក្នុងឈាមធ្ងន់ធ្ងរ (Sepsis, unspecified)", en: "Sepsis, unspecified organism", keywords: ["មេរោគក្នុងឈាម", "ក្ដៅខ្លួនខ្លាំង", "សន្លឹម"] },
+      { code: "A97.9", cat: "INFECT", kh: "ជំងឺគ្រុនឈាម (Dengue fever, unspecified)", en: "Dengue, unspecified", keywords: ["គ្រុនឈាម", "ក្ដៅខ្លួនខ្លាំង"] },
+      { code: "A97.2", cat: "INFECT", kh: "ជំងឺគ្រុនឈាមកម្រិតធ្ងន់ / សុកគ្រុនឈាម (Severe dengue)", en: "Severe dengue", keywords: ["សុកគ្រុនឈាម", "គ្រុនឈាមធ្ងន់"] },
+      { code: "A15.0", cat: "INFECT", kh: "ជំងឺរបេងសួត (Tuberculosis of lung)", en: "Tuberculosis of lung", keywords: ["របេង", "ក្អកឈាម"] },
+
+      // ១១. តម្រងនោម & ផ្លូវទឹកនោម (RENAL: N00-N99)
+      { code: "N17.9", cat: "RENAL", kh: "ខ្សោយតម្រងនោមស្រួចស្រាវ (Acute kidney failure)", en: "Acute kidney failure, unspecified", keywords: ["ខ្សោយតម្រងនោម", "ទឹកនោមតិច", "ហើមខ្លួន"] },
+      { code: "N18.9", cat: "RENAL", kh: "ជំងឺខ្សោយតម្រងនោមរ៉ាំរ៉ៃ (Chronic kidney disease)", en: "Chronic kidney disease, unspecified", keywords: ["ខ្សោយតម្រងនោមរ៉ាំរ៉ៃ", "លាងឈាម", "ហត់"] },
+      { code: "N20.0", cat: "RENAL", kh: "គ្រួសក្នុងតម្រងនោមធ្វើទុក្ខ (Calculus of kidney / Renal colic)", en: "Calculus of kidney", keywords: ["គ្រួសក្នុងតម្រងនោម", "ចុកចង្កេះ", "ឈឺចង្កេះ"] },
+      { code: "N39.0", cat: "RENAL", kh: "រលាកផ្លូវទឹកនោម (Urinary tract infection - UTI)", en: "Urinary tract infection, site not specified", keywords: ["រលាកផ្លូវទឹកនោម", "នោមទាស់", "ក្ដៅខ្លួន"] },
+      { code: "R33.9", cat: "RENAL", kh: "ស្ទះទឹកនោម / នោមមិនចេញ (Retention of urine)", en: "Retention of urine, unspecified", keywords: ["នោមមិនចេញ", "ស្ទះទឹកនោម", "ឈឺថ្ងាសក្រោម"] },
+
+      // ១២. វិបត្តិផ្លូវចិត្ត & ស្រវឹង/គ្រឿងញៀន (PSYCH: F00-F99)
+      { code: "F10.0", cat: "PSYCH", kh: "ស្រវឹងសុរាស្រួចស្រាវ (Acute alcohol intoxication)", en: "Mental and behavioral disorders due to use of alcohol, acute intoxication", keywords: ["ស្រវឹង", "ផឹកស្រា", "ឡូឡា"] },
+      { code: "F10.4", cat: "PSYCH", kh: "ធ្វើទុក្ខផ្ដាច់ស្រា / រវើរវាយញ័រដៃជើង (Alcohol withdrawal state with delirium)", en: "Alcohol withdrawal state with delirium", keywords: ["ញៀនស្រា", "ផ្ដាច់ស្រា", "រវើរវាយ"] },
+      { code: "F19.0", cat: "PSYCH", kh: "ពុល ឬប្រើប្រាស់គ្រឿងញៀនហួសកម្រិត (Acute drug intoxication)", en: "Acute intoxication due to multiple drug use", keywords: ["គ្រឿងញៀន", "បែកថ្នាំ"] },
+      { code: "F41.0", cat: "PSYCH", kh: "វិបត្តិភ័យស្លន់ស្លោ / ថប់បារម្ភខ្លាំង (Panic disorder / Anxiety attack)", en: "Panic disorder [episodic paroxysmal anxiety]", keywords: ["ភ័យស្លន់ស្លោ", "ថប់ដង្ហើម", "គាំងដៃជើង"] },
+
+      // ១៣. រោគសញ្ញាទូទៅ & សង្គ្រោះបន្ទាន់ (SYMPTOM: R00-R99)
+      { code: "R00.0", cat: "SYMPTOM", kh: "ជីពចរដើរញាប់ (Tachycardia, unspecified)", en: "Tachycardia, unspecified", keywords: ["បេះដូងដើរញាប់", "ញ័រទ្រូង"] },
+      { code: "R04.0", cat: "SYMPTOM", kh: "ហូរឈាមច្រមុះ (Epistaxis)", en: "Epistaxis", keywords: ["ឈាមច្រមុះ", "ហូរឈាមច្រមុះ"] },
+      { code: "R04.2", cat: "SYMPTOM", kh: "ក្អកធ្លាក់ឈាម (Hemoptysis)", en: "Hemoptysis", keywords: ["ក្អកឈាម", "ធ្លាក់ឈាម"] },
+      { code: "R06.0", cat: "SYMPTOM", kh: "ហត់ / ពិបាកដកដង្ហើម (Dyspnea)", en: "Dyspnea", keywords: ["ហត់", "ដង្ហក់", "ពិបាកដកដង្ហើម", "ថប់ដង្ហើម", "ធ្លាក់អុកស៊ីសែន", "នៅផ្ទះ"] },
+      { code: "R07.4", cat: "SYMPTOM", kh: "ឈឺដើមទ្រូងខ្លាំង (Chest pain, unspecified)", en: "Chest pain, unspecified", keywords: ["ឈឺទ្រូង", "ចុកទ្រូង", "ណែនទ្រូង", "បេះដូង"] },
+      { code: "R09.2", cat: "SYMPTOM", kh: "គាំងដង្ហើម / ឈប់ដកដង្ហើម (Respiratory arrest)", en: "Respiratory arrest", keywords: ["គាំងដង្ហើម", "ឈប់ដកដង្ហើម"] },
+      { code: "R10.0", cat: "SYMPTOM", kh: "ឈឺពោះខ្លាំងស្រួចស្រាវ (Acute abdomen)", en: "Acute abdomen", keywords: ["ឈឺពោះខ្លាំង", "ចុកពោះ", "រឹងពោះ", "នៅផ្ទះ"] },
+      { code: "R11.2", cat: "SYMPTOM", kh: "ចង្អោរ និងក្អួតខ្លាំង (Nausea with vomiting)", en: "Nausea with vomiting, unspecified", keywords: ["ក្អួត", "ចង្អោរ"] },
+      { code: "R40.0", cat: "SYMPTOM", kh: "សន្លឹម / ងងុយដេកខុសធម្មតា (Somnolence / Drowsiness)", en: "Somnolence", keywords: ["សន្លឹម", "ទន់ខ្សោយ"] },
+      { code: "R40.2", cat: "SYMPTOM", kh: "សន្លប់បាត់ស្មារតីធ្ងន់ធ្ងរ (Coma, unspecified)", en: "Coma, unspecified", keywords: ["សន្លប់ធ្ងន់", "មិនដឹងខ្លួន", "GCS", "សន្លប់"] },
+      { code: "R42", cat: "SYMPTOM", kh: "វិលមុខខ្លាំង (Dizziness and giddiness / Vertigo)", en: "Dizziness and giddiness", keywords: ["វិលមុខ", "ឈឺក្បាលវិលមុខ", "នៅផ្ទះ"] },
+      { code: "R50.9", cat: "SYMPTOM", kh: "គ្រុនក្ដៅខ្លាំង (Fever, unspecified)", en: "Fever, unspecified", keywords: ["ក្ដៅខ្លួន", "គ្រុនក្ដៅ"] },
+      { code: "R51", cat: "SYMPTOM", kh: "ឈឺក្បាលខ្លាំង (Headache)", en: "Headache", keywords: ["ឈឺក្បាល", "ចុកក្បាល"] },
+      { code: "R53", cat: "SYMPTOM", kh: "អស់កម្លាំងទន់ដៃជើងខ្លាំង (Malaise and fatigue)", en: "Malaise and fatigue", keywords: ["អស់កម្លាំង", "ល្ហិតល្ហៃ", "នៅផ្ទះ"] },
+      { code: "R55", cat: "SYMPTOM", kh: "សន្លប់បាត់បង់ស្មារតីមួយភ្លែត (Syncope and collapse)", en: "Syncope and collapse", keywords: ["សន្លប់", "បាត់ស្មារតី", "ងងឹតមុខ", "ដួលសន្លប់"] },
+      { code: "R56.0", cat: "SYMPTOM", kh: "ប្រកាច់ដោយសារក្ដៅខ្លួនខ្លាំង (Febrile convulsions)", en: "Febrile convulsions", keywords: ["ក្ដៅខ្លួនប្រកាច់", "កូនក្មេងប្រកាច់"] },
+      { code: "R56.8", cat: "SYMPTOM", kh: "ប្រកាច់ (Convulsions, unspecified)", en: "Other and unspecified convulsions", keywords: ["ប្រកាច់", "រឹងថ្គាម"] },
+      { code: "R57.0", cat: "SYMPTOM", kh: "សុកដោយសារខ្សោយបេះដូងធ្ងន់ធ្ងរ (Cardiogenic shock)", en: "Cardiogenic shock", keywords: ["សុកបេះដូង", "ធ្លាក់ឈាមខ្លាំង"] },
+      { code: "R57.1", cat: "SYMPTOM", kh: "សុកដោយសារបាត់បង់ឈាម ឬជាតិទឹកខ្លាំង (Hypovolemic shock)", en: "Hypovolemic shock", keywords: ["សុកបាត់ឈាម", "ធ្លាក់សម្ពាធឈាម"] },
+      { code: "R57.2", cat: "SYMPTOM", kh: "សុកដោយសារមេរោគក្នុងឈាម (Septic shock)", en: "Septic shock", keywords: ["សុកមេរោគ", "ក្ដៅខ្លួនធ្លាក់ឈាម"] },
+      { code: "R57.9", cat: "SYMPTOM", kh: "ស្ថានភាពសុកធ្ងន់ធ្ងរ (Shock, unspecified)", en: "Shock, unspecified", keywords: ["សុក", "ធ្លាក់សម្ពាធឈាមខ្លាំង"] },
+      { code: "R58", cat: "SYMPTOM", kh: "ហូរឈាមខ្លាំង (Hemorrhage, not elsewhere classified)", en: "Hemorrhage, not elsewhere classified", keywords: ["ហូរឈាម", "ធ្លាក់ឈាម"] },
+      { code: "R99", cat: "SYMPTOM", kh: "ស្លាប់មុនពេលបញ្ជូនមកដល់មន្ទីរពេទ្យ (Dead on arrival / Unspecified mortality)", en: "Ill-defined and unknown cause of mortality", keywords: ["ស្លាប់", "ដាច់ខ្យល់មុនដល់ពេទ្យ"] },
+
+      // ១៤. មូលហេតុខាងក្រៅ (EXT: V01-Y99)
+      { code: "V29.9", cat: "EXT", kh: "គ្រោះថ្នាក់ចរាចរណ៍ម៉ូតូ (Motorcycle accident)", en: "Motorcycle rider injured in unspecified traffic accident", keywords: ["ម៉ូតូ", "ដួលម៉ូតូ", "បុកម៉ូតូ", "គ្រោះថ្នាក់ចរាចរណ៍"] },
+      { code: "V49.9", cat: "EXT", kh: "គ្រោះថ្នាក់ចរាចរណ៍រថយន្ត (Car traffic accident)", en: "Car occupant injured in unspecified traffic accident", keywords: ["ឡានបុក", "រថយន្ត", "គ្រោះថ្នាក់ចរាចរណ៍"] },
+      { code: "V09.2", cat: "EXT", kh: "គ្រោះថ្នាក់ចរាចរណ៍បុកអ្នកថ្មើរជើង (Pedestrian injured in traffic accident)", en: "Pedestrian injured in traffic accident", keywords: ["បុកអ្នកដើរ", "ថ្មើរជើង"] },
+      { code: "W01", cat: "EXT", kh: "រអិលដួលលើพื้นរាបស្មើ (Fall on same level from slipping/tripping)", en: "Fall on same level from slipping, tripping and stumbling", keywords: ["រអិលដួល", "ដួលក្នុងបន្ទប់ទឹក", "នៅផ្ទះ"] },
+      { code: "W10", cat: "EXT", kh: "ធ្លាក់ពីលើជណ្ដើរ (Fall on and from stairs and steps)", en: "Fall on and from stairs and steps", keywords: ["ធ្លាក់ជណ្ដើរ", "រអិលជណ្ដើរ"] },
+      { code: "W13", cat: "EXT", kh: "ធ្លាក់ពីលើផ្ទះ ឬអគារខ្ពស់ (Fall from, out of or through building or structure)", en: "Fall from, out of or through building or structure", keywords: ["ធ្លាក់លើផ្ទះឬអាគារ", "ធ្លាក់ពីលើអាគារ", "ធ្លាក់ពីលើដំបូល"] },
+      { code: "X00", cat: "EXT", kh: "គ្រោះថ្នាក់ភ្លើងឆេះក្នុងអគារ ឬផ្ទះ (Exposure to uncontrolled fire in building)", en: "Exposure to uncontrolled fire in building or structure", keywords: ["ភ្លើងឆេះផ្ទះ", "ភ្លើងឆេះឬរលាកភ្លើង"] },
+      { code: "X99", cat: "EXT", kh: "រងរបួសដោយសារវត្ថុមុតស្រួច/កាំបិតចាក់ឬកាប់ (Assault by sharp object)", en: "Assault by sharp object", keywords: ["កាប់", "ចាក់", "កាំបិត", "វាយគ្នា"] },
+      { code: "Y04", cat: "EXT", kh: "រងរបួសដោយសារការវាយតប់គ្នា (Assault by bodily force)", en: "Assault by bodily force", keywords: ["វាយគ្នា", "វាយតប់"] }
+    ];
+
+    let onlineSearchTimer = null;
+
+    function renderIcdSuggestions(list, isAppend = false) {
+      const box = document.getElementById('icdSuggestions');
+      const badge = document.getElementById('icdCountBadge');
+      if (!box) return;
+      if (!isAppend) box.innerHTML = '';
+
+      list.forEach(item => {
+        // ជៀសវាងការបង្ហាញកូដស្ទួន
+        if (box.querySelector(`[data-code="${item.code}"]`)) return;
+
+        const chip = document.createElement('div');
+        chip.className = 'chip-item';
+        chip.dataset.code = item.code;
+        chip.style.background = item.isOnline ? '#e0f2fe' : '#ede9fe';
+        chip.style.borderColor = item.isOnline ? '#7dd3fc' : '#c4b5fd';
+        chip.style.color = item.isOnline ? '#0369a1' : '#3730a3';
+        const labelText = item.kh ? `${item.kh} (${item.en})` : item.en;
+        chip.innerHTML = `<strong>[${item.code}]</strong> ${labelText}`;
+        chip.onclick = () => insertIcdToSymptoms(item);
+        box.appendChild(chip);
+      });
+
+      if (badge) {
+        const totalShown = box.querySelectorAll('.chip-item').length;
+        badge.textContent = `មាន ${totalShown} កូដ`;
+      }
+    }
+
+    // ទម្រង់ ICD-10៖ ដាក់កូដនៅខាងមុខ ហើយបង្ហាញជាអក្សរអង់គ្លេសតែប៉ុណ្ណោះ (គ្មានអក្សរខ្មែរ)
+    function formatIcdLine(item) {
+      return `ICD-10: ${item.code} - ${item.en}`;
+    }
+
+    function insertIcdToSymptoms(item) {
+      const textarea = document.getElementById('symptoms');
+      const formatted = formatIcdLine(item);
+      if (textarea.value.trim() === '') {
+        textarea.value = formatted;
+      } else if (!textarea.value.includes(item.code)) {
+        textarea.value = textarea.value.trim() + '\n• ' + formatted;
+      }
+      showToast(`បានបញ្ចូលកូដ ${item.code}`);
+    }
+
+    async function filterIcdList() {
+      const q = (document.getElementById('icdSearchInput')?.value || '').trim().toLowerCase();
+      const cat = document.getElementById('icdCategoryFilter')?.value || 'ALL';
+      const statusEl = document.getElementById('icdOnlineStatus');
+
+      let filtered = EMS_ICD10_DB.filter(item => {
+        const matchCat = (cat === 'ALL') || (item.cat === cat);
+        if (!matchCat) return false;
+        if (!q) return true;
+        return (
+          item.code.toLowerCase().includes(q) ||
+          item.kh.toLowerCase().includes(q) ||
+          item.en.toLowerCase().includes(q) ||
+          item.keywords.some(k => k.toLowerCase().includes(q))
+        );
+      });
+
+      renderIcdSuggestions(filtered, false);
+
+      // ស្វែងរកបន្ថែមពីប្រព័ន្ធ ICD-10 អន្តរជាតិ (NIH/NLM Clinical Tables API - មានកូដ ICD-10 ជាង 70,000+ កូដទាំងអស់)
+      if (onlineSearchTimer) clearTimeout(onlineSearchTimer);
+      if (q.length >= 2 && /[a-z0-9]/i.test(q)) {
+        onlineSearchTimer = setTimeout(async () => {
+          try {
+            if (statusEl) statusEl.style.display = 'block';
+            const res = await fetch(`https://clinicaltables.nlm.nih.gov/api/icd10cm/v3/search?sf=code,name&terms=${encodeURIComponent(q)}&maxList=25`);
+            const data = await res.json();
+            if (statusEl) statusEl.style.display = 'none';
+            if (Array.isArray(data) && Array.isArray(data[3])) {
+              const onlineItems = data[3].map(row => ({
+                code: row[0],
+                kh: "",
+                en: row[1],
+                isOnline: true
+              }));
+              renderIcdSuggestions(onlineItems, true);
+            }
+          } catch (err) {
+            if (statusEl) statusEl.style.display = 'none';
+          }
+        }, 350);
+      } else {
+        if (statusEl) statusEl.style.display = 'none';
+      }
+    }
+
+    function analyzeSymptomsAI() {
+      const caseType = document.getElementById('caseType').value;
+      const currentText = document.getElementById('symptoms').value.trim();
+      const combinedQuery = (caseType + ' ' + currentText).toLowerCase();
+
+      // ពិន្ទុវិភាគភាពត្រូវគ្នារបស់ AI
+      const scored = EMS_ICD10_DB.map(item => {
+        let score = 0;
+        if (currentText && combinedQuery.includes(item.kh.toLowerCase())) score += 5;
+        if (currentText && combinedQuery.includes(item.en.toLowerCase())) score += 5;
+        item.keywords.forEach(k => {
+          const kw = k.toLowerCase();
+          if (currentText.toLowerCase().includes(kw)) score += 3;
+          else if (caseType.toLowerCase().includes(kw)) score += 1;
+        });
+        return { item, score };
+      }).filter(x => x.score > 0).sort((a, b) => b.score - a.score);
+
+      let matched = scored.map(x => x.item);
+
+      if (matched.length === 0) {
+        if (caseType === 'គ្រោះថ្នាក់ចរាចរណ៍') matched = EMS_ICD10_DB.filter(i => ['S06.9', 'T07', 'T14.1', 'V29.9'].includes(i.code));
+        else if (caseType === 'ភ្លើងឆេះឬរលាកភ្លើង') matched = EMS_ICD10_DB.filter(i => ['T30.0', 'T59.8', 'T29.0', 'X00'].includes(i.code));
+        else if (caseType === 'នៅផ្ទះ') matched = EMS_ICD10_DB.filter(i => ['I10', 'I64', 'R06.0', 'E16.2', 'R10.0'].includes(i.code));
+        else if (caseType === 'សន្លប់') matched = EMS_ICD10_DB.filter(i => ['R55', 'R40.2', 'E16.2', 'I64'].includes(i.code));
+        else if (caseType === 'គាំងបេះដូង') matched = EMS_ICD10_DB.filter(i => ['I46.9', 'I21.9', 'R07.4', 'R57.0'].includes(i.code));
+        else if (caseType === 'រអិលដួល') matched = EMS_ICD10_DB.filter(i => ['S72.0', 'S06.0', 'S52.5', 'W01'].includes(i.code));
+        else if (caseType === 'ធ្លាក់លើផ្ទះឬអាគារ') matched = EMS_ICD10_DB.filter(i => ['T07', 'S06.9', 'T02.9', 'W13'].includes(i.code));
+        else if (caseType === 'វាយគ្នា') matched = EMS_ICD10_DB.filter(i => ['T14.1', 'S01.9', 'S06.9', 'Y04'].includes(i.code));
+      }
+
+      if (matched.length > 0) {
+        renderIcdSuggestions(matched, false);
+        const topMatch = matched[0];
+        const textarea = document.getElementById('symptoms');
+        if (!textarea.value.includes(topMatch.code)) {
+          const prefix = textarea.value.trim() ? textarea.value.trim() + '\n' : '';
+          textarea.value = `${prefix}${formatIcdLine(topMatch)}`;
+        }
+        showToast(`🤖 AI បានវិភាគ និងភ្ជាប់កូដ ${topMatch.code} រួចរាល់!`);
+      } else {
+        renderIcdSuggestions(EMS_ICD10_DB, false);
+        showToast('សូមជ្រើសរើស ឬស្វែងរកកូដ ICD-10 ខាងក្រោម');
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      renderIcdSuggestions(EMS_ICD10_DB, false);
+      const caseSelect = document.getElementById('caseType');
+      if (caseSelect) {
+        caseSelect.addEventListener('change', () => {
+          const val = caseSelect.value;
+          const catSelect = document.getElementById('icdCategoryFilter');
+          if (val === 'គ្រោះថ្នាក់ចរាចរណ៍' || val === 'រអិលដួល' || val === 'ធ្លាក់លើផ្ទះឬអាគារ' || val === 'វាយគ្នា') {
+            if (catSelect) catSelect.value = 'TRAUMA';
+          } else if (val === 'ភ្លើងឆេះឬរលាកភ្លើង') {
+            if (catSelect) catSelect.value = 'BURN';
+          } else if (val === 'គាំងបេះដូង') {
+            if (catSelect) catSelect.value = 'CARDIO';
+          } else if (val === 'សន្លប់') {
+            if (catSelect) catSelect.value = 'SYMPTOM';
+          } else {
+            if (catSelect) catSelect.value = 'ALL';
+          }
+          filterIcdList();
+        });
+      }
+    });
+
     async function generateCanvas() {
       if (document.fonts && document.fonts.ready) {
         await document.fonts.ready;
@@ -889,26 +1309,14 @@
       clone.style.zIndex = '-1000';
       clone.style.backgroundColor = '#ffffff';
 
-      const historyContainer = clone.querySelector('#symptomsHistoryContainer');
-      if (historyContainer) historyContainer.remove();
-      const clearHistoryBtn = clone.querySelector('.clear-history-btn');
-      if (clearHistoryBtn) clearHistoryBtn.remove();
-      const photoBtns = clone.querySelector('#photoButtonsArea');
-      if (photoBtns) photoBtns.remove();
-      const removeBtn = clone.querySelector('.remove-photo-btn');
-      if (removeBtn) removeBtn.remove();
-
-      const inputs = source.querySelectorAll('input, select, textarea');
-      const cloneInputs = clone.querySelectorAll('input, select, textarea');
+      // កំណត់យកតែប្រអប់ទិន្នន័យនៃទម្រង់របាយការណ៍ប៉ុណ្ណោះ (មិនរាប់បញ្ចូល input file ឬប្រអប់ស្វែងរក AI ឡើយ ដើម្បីកុំឱ្យបាត់ម៉ោងទទួលទូរស័ព្ទ និងម៉ោងចេញដំណើរ)
+      const selector = 'input:not([type="file"]):not(#icdSearchInput), select:not(#icdCategoryFilter), textarea';
+      const inputs = source.querySelectorAll(selector);
+      const cloneInputs = clone.querySelectorAll(selector);
 
       inputs.forEach((origInput, idx) => {
         const targetElement = cloneInputs[idx];
         if (!targetElement) return;
-
-        if (origInput.type === 'file') {
-          targetElement.remove();
-          return;
-        }
 
         const refOtherVal = document.getElementById('referOther').value.trim();
         if (origInput.id === 'referHospital' && refOtherVal) {
@@ -938,8 +1346,8 @@
         targetElement.parentNode.replaceChild(displayDiv, targetElement);
       });
 
-      const mapBtn = clone.querySelector('.btn-map');
-      if (mapBtn) mapBtn.remove();
+      // លុបផ្ទាំងប៊ូតុងជំនួយ បន្ទាប់ពីបំប្លែងទិន្នន័យរួចរាល់
+      clone.querySelectorAll('.no-export, #symptomsHistoryContainer, .clear-history-btn, #photoButtonsArea, .remove-photo-btn, .btn-map, #aiIcdPanel').forEach(el => el.remove());
 
       const cloneGrid = clone.querySelector('#photoGrid');
       if (cloneGrid) {
@@ -982,9 +1390,26 @@
       return canvas;
     }
 
+    // ស្លាកលេខរថយន្ត និងម៉ោងទាំង ៤ ជាអត្ថបទ (បង្ហាញចេញក្រៅរូបភាព ពេលបញ្ជូនទៅ Telegram)
+    function getScheduleText() {
+      const v = id => (document.getElementById(id)?.value || '').trim() || '---';
+      return [
+        `🚘 ស្លាកលេខរថយន្ត៖ ${v('vehiclePlate')}`,
+        `📞 ម៉ោងទទួលទូរស័ព្ទ៖ ${v('timeCall')}`,
+        `🚑 ម៉ោងចេញដំណើរ៖ ${v('timeDepart')}`,
+        `📍 ម៉ោងដល់កន្លែងកើតហេតុ៖ ${v('timeArriveScene')}`,
+        `🏥 ម៉ោងមកដល់មន្ទីរពេទ្យ៖ ${v('timeArriveHospital')}`
+      ].join('\n');
+    }
+
     async function processAndShare() {
       const symText = document.getElementById('symptoms').value;
       saveSymptomToHistory(symText);
+
+      const scheduleText = getScheduleText();
+      // ចម្លងអត្ថបទទុកជាមុន ដើម្បីអាច Paste ជា Caption ក្នុង Telegram បាន ប្រសិនបើកម្មវិធី Share មិនយកអត្ថបទ
+      let copied = false;
+      try { await navigator.clipboard.writeText(scheduleText); copied = true; } catch (e) {}
 
       showToast("កំពុងរៀបចំឯកសារ...");
       try {
@@ -998,12 +1423,14 @@
             try {
               await navigator.share({
                 files: [file],
-                title: 'របាយការណ៍សង្គ្រោះបន្ទាន់ EMS'
+                title: 'របាយការណ៍សង្គ្រោះបន្ទាន់ EMS',
+                text: scheduleText
               });
               return;
             } catch (e) {}
           }
           
+          if (copied) showToast('បានចម្លងអត្ថបទម៉ោង - សូម Paste ក្នុង Telegram');
           const link = document.createElement('a');
           link.download = fileName;
           link.href = URL.createObjectURL(blob);
